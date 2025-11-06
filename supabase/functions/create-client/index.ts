@@ -100,15 +100,18 @@ Deno.serve(async (req: Request) => {
 
     const isAdmin = email === 'admin@demo.com';
 
-    const { data: existingClientByEmail } = await supabaseAdmin
-      .from('clients')
-      .select('id, email')
-      .eq('email', email)
-      .maybeSingle();
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: {
+        role: isAdmin ? 'admin' : 'client',
+      },
+    });
 
-    if (existingClientByEmail) {
+    if (authError) {
       return new Response(
-        JSON.stringify({ error: 'Un client avec cet email existe déjà' }),
+        JSON.stringify({ error: authError.message }),
         {
           status: 400,
           headers: {
@@ -119,70 +122,16 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
-    const userExists = existingUser?.users?.find(u => u.email === email);
-
-    let userId: string;
-
-    if (userExists) {
-      userId = userExists.id;
-
+    if (authData.user) {
       const { error: clientError } = await supabaseAdmin
         .from('clients')
         .insert({
-          id: userId,
+          id: authData.user.id,
           email,
           role: isAdmin ? 'admin' : 'client',
         });
 
       if (clientError) {
-        return new Response(
-          JSON.stringify({ error: clientError.message }),
-          {
-            status: 400,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-      }
-    } else {
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          role: isAdmin ? 'admin' : 'client',
-        },
-      });
-
-      if (authError) {
-        return new Response(
-          JSON.stringify({ error: authError.message }),
-          {
-            status: 400,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-      }
-
-      userId = authData.user.id;
-
-      const { error: clientError } = await supabaseAdmin
-        .from('clients')
-        .insert({
-          id: userId,
-          email,
-          role: isAdmin ? 'admin' : 'client',
-        });
-
-      if (clientError) {
-        await supabaseAdmin.auth.admin.deleteUser(userId);
-
         return new Response(
           JSON.stringify({ error: clientError.message }),
           {
@@ -200,8 +149,8 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         success: true,
         user: {
-          id: userId,
-          email: email,
+          id: authData.user.id,
+          email: authData.user.email,
           role: isAdmin ? 'admin' : 'client',
         },
       }),
