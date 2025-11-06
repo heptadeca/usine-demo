@@ -157,39 +157,15 @@ export function AdminDashboard() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ? Cette action supprimera aussi tous ses bots, sessions et accès. Cette action est irréversible.')) return;
 
     try {
-      const { error: sessionsError } = await supabase
-        .from('sessions')
-        .delete()
-        .eq('client_id', clientId);
-
-      if (sessionsError) {
-        console.error('Failed to delete sessions:', sessionsError);
-      }
-
-      const { error: botsError } = await supabase
-        .from('bots')
-        .delete()
-        .eq('owner_client_id', clientId);
-
-      if (botsError) {
-        console.error('Failed to delete bots:', botsError);
-      }
-
-      const { error: clientError } = await supabase
+      const { error } = await supabase
         .from('clients')
         .delete()
         .eq('id', clientId);
 
-      if (clientError) {
-        console.error('Failed to delete client:', clientError);
-        alert('Erreur lors de la suppression du client: ' + clientError.message);
+      if (error) {
+        console.error('Failed to delete client:', error);
+        alert('Erreur lors de la suppression du client: ' + error.message);
         return;
-      }
-
-      const { error: authError } = await supabase.auth.admin.deleteUser(clientId);
-
-      if (authError) {
-        console.error('Failed to delete auth user:', authError);
       }
 
       await loadClients();
