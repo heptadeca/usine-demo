@@ -99,13 +99,14 @@ Deno.serve(async (req: Request) => {
     );
 
     const isAdmin = email === 'admin@demo.com';
+    const role = isAdmin ? 'admin' : 'client';
 
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: {
-        role: isAdmin ? 'admin' : 'client',
+        role: role,
       },
     });
 
@@ -122,8 +123,54 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // The clients table entry is automatically created by the handle_new_user() trigger
-    // when a user is created in auth.users, so we don't need to insert manually
+    if (!authData.user) {
+      return new Response(
+        JSON.stringify({ error: 'Failed to create user' }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    // Wait a moment for the trigger to execute
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Verify the client was created in the clients table by the trigger
+    const { data: clientData, error: clientCheckError } = await supabaseAdmin
+      .from('clients')
+      .select('id, email, role')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+
+    // If trigger didn't work, create manually as fallback
+    if (!clientData) {
+      const { error: insertError } = await supabaseAdmin
+        .from('clients')
+        .insert({
+          id: authData.user.id,
+          email: email,
+          role: role,
+        });
+
+      if (insertError) {
+        // Rollback: delete the auth user since we can't create the client entry
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create client record: ' + insertError.message }),
+          {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+    }
 
     return new Response(
       JSON.stringify({
@@ -131,7 +178,7 @@ Deno.serve(async (req: Request) => {
         user: {
           id: authData.user.id,
           email: authData.user.email,
-          role: isAdmin ? 'admin' : 'client',
+          role: role,
         },
       }),
       {
