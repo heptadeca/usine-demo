@@ -100,6 +100,25 @@ Deno.serve(async (req: Request) => {
 
     const isAdmin = email === 'admin@demo.com';
 
+    const { data: existingClientByEmail } = await supabaseAdmin
+      .from('clients')
+      .select('id, email')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existingClientByEmail) {
+      return new Response(
+        JSON.stringify({ error: 'Un client avec cet email existe déjà' }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
     const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
     const userExists = existingUser?.users?.find(u => u.email === email);
 
@@ -107,25 +126,6 @@ Deno.serve(async (req: Request) => {
 
     if (userExists) {
       userId = userExists.id;
-
-      const { data: existingClient } = await supabaseAdmin
-        .from('clients')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (existingClient) {
-        return new Response(
-          JSON.stringify({ error: 'Un client avec cet email existe déjà' }),
-          {
-            status: 400,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-      }
 
       const { error: clientError } = await supabaseAdmin
         .from('clients')
