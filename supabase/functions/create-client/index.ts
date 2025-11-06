@@ -132,6 +132,8 @@ Deno.serve(async (req: Request) => {
         });
 
       if (clientError) {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+
         return new Response(
           JSON.stringify({ error: clientError.message }),
           {
