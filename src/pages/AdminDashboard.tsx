@@ -157,39 +157,28 @@ export function AdminDashboard() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ? Cette action supprimera aussi tous ses bots, sessions et accès. Cette action est irréversible.')) return;
 
     try {
-      const { error: sessionsError } = await supabase
-        .from('sessions')
-        .delete()
-        .eq('client_id', clientId);
-
-      if (sessionsError) {
-        console.error('Failed to delete sessions:', sessionsError);
-      }
-
-      const { error: botsError } = await supabase
-        .from('bots')
-        .delete()
-        .eq('owner_client_id', clientId);
-
-      if (botsError) {
-        console.error('Failed to delete bots:', botsError);
-      }
-
-      const { error: clientError } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId);
-
-      if (clientError) {
-        console.error('Failed to delete client:', clientError);
-        alert('Erreur lors de la suppression du client: ' + clientError.message);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Session expired. Please login again.');
         return;
       }
 
-      const { error: authError } = await supabase.auth.admin.deleteUser(clientId);
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-client`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ clientId }),
+      });
 
-      if (authError) {
-        console.error('Failed to delete auth user:', authError);
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('Failed to delete client:', result.error);
+        alert('Erreur lors de la suppression du client: ' + result.error);
+        return;
       }
 
       await loadClients();
