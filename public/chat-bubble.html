@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Bubble Widget - Preview</title>
+</head>
+<body>
+  <script src="/chatbot-widget.js"></script>
+  <script>
+    (function() {
+      const botId = new URLSearchParams(window.location.search).get('botId');
+      if (!botId) {
+        console.error('Bot ID is required');
+        document.body.innerHTML = '<div style="padding: 40px; text-align: center; font-family: sans-serif;"><h1>Error</h1><p>Bot ID is required. Please use: chat-bubble.html?botId=YOUR_BOT_ID</p></div>';
+        return;
+      }
+
+      ChatbotWidget.init({
+        botId: botId,
+        origin: window.location.origin
+      });
+    })();
+  </script>
+</body>
+</html>
