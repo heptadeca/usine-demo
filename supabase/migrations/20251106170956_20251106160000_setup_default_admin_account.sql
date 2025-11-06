@@ -1,10 +1,11 @@
 /*
-  # Setup Default Admin Account
+  # Setup Default Admin Account & Auto-Client Creation
 
   1. Changes
     - Remove unused pw_hash column from clients table
     - Remove unused admin_key column from clients table
     - Create default admin account (admin@demo.com)
+    - Create trigger to auto-create client records when users are created
     - Ensure clean authentication flow using only Supabase Auth
 
   2. Security
@@ -14,7 +15,12 @@
 
   3. Auto-setup
     - On fresh deployment, admin account is automatically created
+    - Trigger ensures every auth.users entry gets a clients table entry
     - Idempotent: safe to run multiple times
+
+  4. Critical
+    - The trigger on auth.users is ESSENTIAL for client creation to work
+    - Without it, new users won't appear in the clients table
 */
 
 -- Remove unused columns from clients table
@@ -112,7 +118,7 @@ $$;
 -- Execute the setup function
 SELECT setup_default_admin();
 
--- Update trigger to remove admin_key handling
+-- Create trigger function to auto-create client records
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -126,10 +132,21 @@ BEGIN
     COALESCE(NEW.raw_app_meta_data->>'role', 'client')
   )
   ON CONFLICT (id) DO UPDATE
-  SET 
+  SET
     email = EXCLUDED.email,
     role = COALESCE(NEW.raw_app_meta_data->>'role', clients.role);
-  
+
   RETURN NEW;
 END;
 $$;
+
+-- Create the trigger that fires after user creation
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_new_user();
+
+-- Grant necessary permissions
+GRANT EXECUTE ON FUNCTION handle_new_user() TO authenticated;
+GRANT EXECUTE ON FUNCTION handle_new_user() TO service_role;
