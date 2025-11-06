@@ -122,28 +122,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (authData.user) {
-      const { error: clientError } = await supabaseAdmin
-        .from('clients')
-        .insert({
-          id: authData.user.id,
-          email,
-          role: isAdmin ? 'admin' : 'client',
-        });
-
-      if (clientError) {
-        return new Response(
-          JSON.stringify({ error: clientError.message }),
-          {
-            status: 400,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-      }
-    }
+    // The clients table entry is automatically created by the handle_new_user() trigger
+    // when a user is created in auth.users, so we don't need to insert manually
 
     return new Response(
       JSON.stringify({
