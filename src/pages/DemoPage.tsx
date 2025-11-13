@@ -14,7 +14,7 @@ export function DemoPage({ botId }: DemoPageProps) {
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-semibold text-slate-900">Démo Chatbot</h1>
+            <h1 className="font-semibold text-slate-900">Besoin d'infos ? Besoin d'aide ?</h1>
             <p className="text-xs text-slate-600">Propulsé par RAG</p>
           </div>
         </div>
