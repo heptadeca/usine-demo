@@ -15,7 +15,7 @@ export function DemoPage({ botId }: DemoPageProps) {
           </div>
           <div>
             <h1 className="font-semibold text-slate-900">Besoin d'infos ? Besoin d'aide ?</h1>
-            <p className="text-xs text-slate-600">Propulsé par RAG</p>
+            <p className="text-xs text-slate-600">Je réponds à vos questions…</p>
           </div>
         </div>
       </div>
