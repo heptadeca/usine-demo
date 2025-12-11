@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getBotConversations, getConversationMessages, Conversation, Message } from '../api/analytics';
-import { MessageSquare, X, User, Bot, Clock, Loader2 } from 'lucide-react';
+import { getBotConversations, getConversationMessages, deleteConversation, Conversation, Message } from '../api/analytics';
+import { MessageSquare, X, User, Bot, Clock, Loader2, Trash2 } from 'lucide-react';
 
 interface BotConversationsProps {
   botId: string;
@@ -39,6 +39,28 @@ export default function BotConversations({ botId }: BotConversationsProps) {
       console.error('Error loading messages:', error);
     } finally {
       setLoadingMessages(false);
+    }
+  }
+
+  async function handleDeleteConversation(sessionId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.')) {
+      return;
+    }
+
+    try {
+      const success = await deleteConversation(sessionId);
+      if (success) {
+        setConversations(conversations.filter(c => c.session_id !== sessionId));
+        if (selectedConversation?.session_id === sessionId) {
+          setSelectedConversation(null);
+          setMessages([]);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      alert('Erreur lors de la suppression de la conversation');
     }
   }
 
@@ -94,29 +116,40 @@ export default function BotConversations({ botId }: BotConversationsProps) {
           </div>
           <div className="divide-y divide-slate-200 max-h-[600px] overflow-y-auto">
             {conversations.map((conv) => (
-              <button
+              <div
                 key={conv.session_id}
-                onClick={() => loadMessages(conv)}
-                className={`w-full px-4 py-3 text-left hover:bg-slate-50 transition ${
+                className={`group relative ${
                   selectedConversation?.session_id === conv.session_id
                     ? 'bg-blue-50 border-l-4 border-blue-600'
                     : ''
                 }`}
               >
-                <div className="flex items-start gap-3">
-                  <MessageSquare className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-900 truncate">
-                      {conv.first_message_preview || 'Nouvelle conversation'}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                      <span>{conv.message_count} messages</span>
-                      <span>•</span>
-                      <span>{formatDate(conv.created_at)}</span>
+                <button
+                  onClick={() => loadMessages(conv)}
+                  className="w-full px-4 py-3 text-left hover:bg-slate-50 transition"
+                >
+                  <div className="flex items-start gap-3">
+                    <MessageSquare className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0 pr-8">
+                      <p className="text-sm text-slate-900 truncate">
+                        {conv.first_message_preview || 'Nouvelle conversation'}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                        <span>{conv.message_count} messages</span>
+                        <span>•</span>
+                        <span>{formatDate(conv.created_at)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
+                </button>
+                <button
+                  onClick={(e) => handleDeleteConversation(conv.session_id, e)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded hover:bg-red-100 text-slate-400 hover:text-red-600 transition opacity-0 group-hover:opacity-100"
+                  title="Supprimer la conversation"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))}
           </div>
         </div>

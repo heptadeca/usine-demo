@@ -90,3 +90,23 @@ export async function getConversationMessages(sessionId: string): Promise<Messag
 
   return data as Message[];
 }
+
+export async function deleteConversation(sessionId: string): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Not authenticated');
+  }
+
+  const { data, error } = await supabase.rpc('delete_conversation', {
+    p_session_id: sessionId,
+    p_user_id: user.id
+  });
+
+  if (error) {
+    console.error('Error deleting conversation:', error);
+    throw error;
+  }
+
+  return data as boolean;
+}
