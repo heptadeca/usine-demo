@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar } from '../components/Navbar';
+import DashboardStats from '../components/DashboardStats';
 import { Plus, Loader2, ExternalLink, Trash2, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Bot, Client } from '../lib/supabase';
@@ -195,6 +196,8 @@ export function AdminDashboard() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <DashboardStats />
+
         <div className="mb-12">
           <div className="flex justify-between items-center mb-8">
             <div>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar } from '../components/Navbar';
+import BotConversations from '../components/BotConversations';
 import { Upload, FileText, Loader2, Trash2, Code, Users, Plus, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { deleteDatasource } from '../api/datasources';
 import type { Bot, Datasource, Event, Client, BotClientAccess } from '../lib/supabase';
 
-type TabType = 'data' | 'integration' | 'clients' | 'events' | 'prompt';
+type TabType = 'data' | 'integration' | 'clients' | 'events' | 'prompt' | 'conversations';
 
 type BotManagePageProps = {
   botId: string;
@@ -304,7 +305,7 @@ export function BotManagePage({ botId }: BotManagePageProps) {
 
         <div className="border-b border-slate-200 mb-6">
           <div className="flex gap-6">
-            {(['data', 'integration', 'clients', 'events', 'prompt'] as TabType[]).map((tab) => (
+            {(['data', 'integration', 'clients', 'conversations', 'events', 'prompt'] as TabType[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -314,7 +315,7 @@ export function BotManagePage({ botId }: BotManagePageProps) {
                     : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {tab === 'data' ? 'Données' : tab === 'integration' ? 'Intégration' : tab === 'clients' ? 'Clients' : tab === 'events' ? 'Événements' : 'Prompt'}
+                {tab === 'data' ? 'Données' : tab === 'integration' ? 'Intégration' : tab === 'clients' ? 'Clients' : tab === 'conversations' ? 'Conversations' : tab === 'events' ? 'Événements' : 'Prompt'}
               </button>
             ))}
           </div>
@@ -577,6 +578,10 @@ export function BotManagePage({ botId }: BotManagePageProps) {
               </table>
             )}
           </div>
+        )}
+
+        {activeTab === 'conversations' && (
+          <BotConversations botId={botId} />
         )}
 
         {activeTab === 'prompt' && (

@@ -67,6 +67,44 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Ensure session exists
+    let currentSessionId = session_id;
+    if (currentSessionId) {
+      const { data: existingSession } = await supabase
+        .from('sessions')
+        .select('id')
+        .eq('id', currentSessionId)
+        .maybeSingle();
+
+      if (!existingSession) {
+        const { data: newSession } = await supabase
+          .from('sessions')
+          .insert({ id: currentSessionId, bot_id })
+          .select('id')
+          .maybeSingle();
+
+        currentSessionId = newSession?.id || currentSessionId;
+      }
+    } else {
+      const { data: newSession } = await supabase
+        .from('sessions')
+        .insert({ bot_id })
+        .select('id')
+        .maybeSingle();
+
+      currentSessionId = newSession?.id;
+    }
+
+    // Log user message
+    const startTime = Date.now();
+    await supabase
+      .from('messages')
+      .insert({
+        session_id: currentSessionId,
+        role: 'user',
+        content: message,
+      });
+
     const n8nUrl = 'https://n8n.prcz.fr/webhook/lacroix-chat';
 
     const n8nResponse = await fetch(n8nUrl, {
@@ -77,7 +115,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         message,
         bot_id,
-        session_id,
+        session_id: currentSessionId,
         prompt: bot.prompt || '',
         k: k || 8,
         temperature: temperature || 0.2,
@@ -100,9 +138,22 @@ Deno.serve(async (req: Request) => {
     }
 
     const data = await n8nResponse.json();
+    const latency = Date.now() - startTime;
+
+    // Log bot response
+    if (data.response) {
+      await supabase
+        .from('messages')
+        .insert({
+          session_id: currentSessionId,
+          role: 'assistant',
+          content: data.response,
+          latency_ms: latency,
+        });
+    }
 
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify({ ...data, session_id: currentSessionId }),
       {
         headers: {
           ...corsHeaders,
