@@ -39,7 +39,10 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     throw error;
   }
 
-  return data as DashboardStats;
+  // The function returns an array with a single row, so we need to get the first element
+  const result = Array.isArray(data) ? data[0] : data;
+
+  return result as DashboardStats;
 }
 
 export async function getBotConversations(
