@@ -1,12 +1,10 @@
 import { supabase } from '../lib/supabase';
 
 export interface DashboardStats {
-  total_bots: number;
-  active_bots: number;
-  total_conversations: number;
   conversations_today: number;
-  total_messages: number;
+  active_bots: number;
   messages_today: number;
+  active_bots_today: string[];
 }
 
 export interface Conversation {

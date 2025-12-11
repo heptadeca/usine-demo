@@ -24,8 +24,8 @@ export default function DashboardStats() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[...Array(4)].map((_, i) => (
           <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
             <div className="h-8 bg-gray-200 rounded w-1/3"></div>
@@ -41,9 +41,9 @@ export default function DashboardStats() {
 
   const statCards = [
     {
-      title: 'Total Bots',
-      value: stats.total_bots,
-      icon: Bot,
+      title: 'Conversations Aujourd\'hui',
+      value: stats.conversations_today,
+      icon: MessageSquare,
       color: 'blue',
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-600'
@@ -58,36 +58,21 @@ export default function DashboardStats() {
       subtitle: '7 derniers jours'
     },
     {
-      title: 'Conversations',
-      value: stats.total_conversations,
-      icon: MessageSquare,
-      color: 'purple',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600'
-    },
-    {
-      title: 'Conversations Aujourd\'hui',
-      value: stats.conversations_today,
+      title: 'Messages Aujourd\'hui',
+      value: stats.messages_today,
       icon: TrendingUp,
       color: 'orange',
       bgColor: 'bg-orange-50',
       iconColor: 'text-orange-600'
     },
     {
-      title: 'Total Messages',
-      value: stats.total_messages.toLocaleString(),
-      icon: MessageSquare,
-      color: 'indigo',
-      bgColor: 'bg-indigo-50',
-      iconColor: 'text-indigo-600'
-    },
-    {
-      title: 'Messages Aujourd\'hui',
-      value: stats.messages_today,
-      icon: Activity,
+      title: 'Bots Utilisés Aujourd\'hui',
+      value: stats.active_bots_today?.filter(Boolean).join(', ') || 'Aucun',
+      icon: Bot,
       color: 'teal',
       bgColor: 'bg-teal-50',
-      iconColor: 'text-teal-600'
+      iconColor: 'text-teal-600',
+      isText: true
     }
   ];
 
@@ -104,18 +89,18 @@ export default function DashboardStats() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, index) => (
           <div
             key={index}
             className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
           >
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 mb-1">
                   {card.title}
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className={`font-bold text-gray-900 ${(card as any).isText ? 'text-base' : 'text-3xl'} ${(card as any).isText ? 'truncate' : ''}`}>
                   {card.value}
                 </p>
                 {card.subtitle && (
@@ -124,7 +109,7 @@ export default function DashboardStats() {
                   </p>
                 )}
               </div>
-              <div className={`${card.bgColor} p-3 rounded-lg`}>
+              <div className={`${card.bgColor} p-3 rounded-lg flex-shrink-0`}>
                 <card.icon className={`w-6 h-6 ${card.iconColor}`} />
               </div>
             </div>
