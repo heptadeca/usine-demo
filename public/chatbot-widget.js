@@ -15,6 +15,7 @@
 
       const botId = config.botId;
       const origin = config.origin || window.location.origin;
+      const primaryColor = config.primaryColor || '#8eb4e3';
 
       const styles = `
         #chatbot-widget-container * {
@@ -35,20 +36,20 @@
           width: 64px;
           height: 64px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          background: ${primaryColor};
           border: none;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
         }
 
         .chatbot-bubble-button:hover {
           transform: scale(1.05);
-          box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
+          opacity: 0.9;
         }
 
         .chatbot-bubble-button:active {
@@ -61,10 +62,10 @@
           transform: scale(0);
         }
 
-        .chatbot-bubble-button svg {
+        .chatbot-bubble-button img {
           width: 32px;
           height: 32px;
-          color: white;
+          object-fit: contain;
         }
 
         .chatbot-bubble-window {
@@ -102,7 +103,7 @@
           width: 32px;
           height: 32px;
           border-radius: 8px;
-          background: rgba(0, 0, 0, 0.05);
+          background: rgba(255, 255, 255, 0.2);
           border: none;
           cursor: pointer;
           display: flex;
@@ -113,13 +114,13 @@
         }
 
         .chatbot-bubble-close-button:hover {
-          background: rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.3);
         }
 
         .chatbot-bubble-close-button svg {
           width: 16px;
           height: 16px;
-          color: #475569;
+          color: white;
         }
 
         .chatbot-bubble-iframe {
@@ -156,7 +157,7 @@
             height: 56px;
           }
 
-          .chatbot-bubble-button svg {
+          .chatbot-bubble-button img {
             width: 28px;
             height: 28px;
           }
@@ -171,14 +172,12 @@
       container.id = 'chatbot-widget-container';
       container.innerHTML = `
         <button class="chatbot-bubble-button" id="chatbot-bubble-button" aria-label="Ouvrir le chat">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
+          <img src="${origin}/image.png" alt="Chat" />
         </button>
 
         <div class="chatbot-bubble-window" id="chatbot-bubble-window">
-          <button class="chatbot-bubble-close-button" id="chatbot-close-button" title="Fermer" aria-label="Fermer">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button class="chatbot-bubble-close-button" id="chatbot-close-button" title="Fermer" aria-label="Fermer" style="background:rgba(255,255,255,0.2)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -190,16 +189,16 @@
       document.body.appendChild(container);
 
       const button = document.getElementById('chatbot-bubble-button');
-      const window = document.getElementById('chatbot-bubble-window');
+      const chatWindow = document.getElementById('chatbot-bubble-window');
       const closeButton = document.getElementById('chatbot-close-button');
 
       button.addEventListener('click', function() {
-        window.classList.add('open');
+        chatWindow.classList.add('open');
         button.classList.add('hidden');
       });
 
       closeButton.addEventListener('click', function() {
-        window.classList.remove('open');
+        chatWindow.classList.remove('open');
         button.classList.remove('hidden');
       });
     }

@@ -13,6 +13,7 @@ export interface Conversation {
   message_count: number;
   last_message_at: string;
   first_message_preview: string;
+  ip_address: string | null;
 }
 
 export interface Message {

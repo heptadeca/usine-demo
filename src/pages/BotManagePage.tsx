@@ -30,6 +30,8 @@ export function BotManagePage({ botId }: BotManagePageProps) {
 
   const [promptText, setPromptText] = useState('');
   const [savingPrompt, setSavingPrompt] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState('#8eb4e3');
+  const [savingColor, setSavingColor] = useState(false);
 
   useEffect(() => {
     loadBotData();
@@ -46,6 +48,7 @@ export function BotManagePage({ botId }: BotManagePageProps) {
       if (!botError && botData) {
         setBot(botData);
         setPromptText(botData.prompt || '');
+        setPrimaryColor((botData as any).primary_color || '#8eb4e3');
       }
 
       const { data: dsData, error: dsError } = await supabase
@@ -238,6 +241,21 @@ export function BotManagePage({ botId }: BotManagePageProps) {
     }
   }
 
+  async function saveColor() {
+    if (!bot) return;
+    setSavingColor(true);
+    try {
+      await supabase
+        .from('bots')
+        .update({ primary_color: primaryColor } as any)
+        .eq('id', bot.id);
+    } catch (error) {
+      console.error('Failed to save color:', error);
+    } finally {
+      setSavingColor(false);
+    }
+  }
+
   async function savePrompt() {
     if (!bot) return;
 
@@ -403,6 +421,53 @@ export function BotManagePage({ botId }: BotManagePageProps) {
 
         {activeTab === 'integration' && (
           <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-slate-200 p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Couleur principale du chatbot</h3>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="w-12 h-12 rounded-lg cursor-pointer border border-slate-200 p-1"
+                    title="Choisir une couleur"
+                  />
+                </div>
+                <div className="flex items-center gap-2 flex-1">
+                  <input
+                    type="text"
+                    value={primaryColor}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (/^#[0-9a-fA-F]{0,6}$/.test(val)) setPrimaryColor(val);
+                    }}
+                    className="px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono w-32"
+                    placeholder="#8eb4e3"
+                  />
+                  <div
+                    className="w-10 h-10 rounded-lg border border-slate-200 shadow-sm flex-shrink-0"
+                    style={{ background: primaryColor }}
+                  />
+                  <button
+                    onClick={saveColor}
+                    disabled={savingColor}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  >
+                    {savingColor ? 'Enregistrement...' : 'Enregistrer'}
+                  </button>
+                  <button
+                    onClick={() => setPrimaryColor('#8eb4e3')}
+                    className="px-3 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition"
+                  >
+                    Réinitialiser
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">
+                Cette couleur s'applique au bouton d'appel, à l'avatar et aux éléments colorés du chatbot. Valeur par défaut : #8eb4e3
+              </p>
+            </div>
+
             <div className="bg-white rounded-lg border border-slate-200 p-6">
               <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Code className="w-5 h-5" />

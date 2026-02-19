@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { MessageCircle, X, Minimize2 } from 'lucide-react';
+import { X, Minimize2 } from 'lucide-react';
 import { ChatWidget } from './ChatWidget';
 
 type ChatBubbleProps = {
   botId: string;
+  primaryColor?: string;
 };
 
-export function ChatBubble({ botId }: ChatBubbleProps) {
+const DEFAULT_COLOR = '#8eb4e3';
+
+export function ChatBubble({ botId, primaryColor = DEFAULT_COLOR }: ChatBubbleProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
@@ -21,10 +24,15 @@ export function ChatBubble({ botId }: ChatBubbleProps) {
           }`}
         >
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 h-full flex flex-col overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 flex items-center justify-between">
+            <div
+              className="px-4 py-3 flex items-center justify-between"
+              style={{ background: primaryColor }}
+            >
               <div className="flex items-center gap-2 text-white">
-                <MessageCircle className="w-5 h-5" />
-                <span className="font-semibold">Assistant de Chat</span>
+                <div className="bg-white/20 rounded-lg p-1">
+                  <img src="/image.png" alt="Chat" className="w-4 h-4 object-contain" />
+                </div>
+                <span className="font-semibold text-sm">Assistant de Chat</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -48,7 +56,7 @@ export function ChatBubble({ botId }: ChatBubbleProps) {
             </div>
             {!isMinimized && (
               <div className="flex-1 overflow-hidden">
-                <ChatWidget botId={botId} />
+                <ChatWidget botId={botId} primaryColor={primaryColor} />
               </div>
             )}
           </div>
@@ -57,12 +65,13 @@ export function ChatBubble({ botId }: ChatBubbleProps) {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-4 rounded-full shadow-2xl transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:opacity-90 ${
           isOpen ? 'scale-0' : 'scale-100'
         }`}
+        style={{ background: primaryColor }}
         aria-label="Ouvrir le chat"
       >
-        <MessageCircle className="w-6 h-6" />
+        <img src="/image.png" alt="Chat" className="w-6 h-6 object-contain" />
       </button>
     </>
   );

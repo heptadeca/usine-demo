@@ -1,9 +1,35 @@
 import { useEffect, useState } from 'react';
 import { getBotConversations, getConversationMessages, deleteConversation, Conversation, Message } from '../api/analytics';
-import { MessageSquare, X, User, Bot, Clock, Loader2, Trash2 } from 'lucide-react';
+import { MessageSquare, X, Loader2, Trash2, Monitor } from 'lucide-react';
 
 interface BotConversationsProps {
   botId: string;
+}
+
+interface MessagePair {
+  date: string;
+  userMessage: string;
+  botResponse: string;
+}
+
+function pairMessages(messages: Message[]): MessagePair[] {
+  const pairs: MessagePair[] = [];
+  let i = 0;
+  while (i < messages.length) {
+    const msg = messages[i];
+    if (msg.role === 'user') {
+      const next = messages[i + 1];
+      pairs.push({
+        date: msg.created_at,
+        userMessage: msg.content,
+        botResponse: next && next.role === 'assistant' ? next.content : '',
+      });
+      i += next && next.role === 'assistant' ? 2 : 1;
+    } else {
+      i++;
+    }
+  }
+  return pairs;
 }
 
 export default function BotConversations({ botId }: BotConversationsProps) {
@@ -44,11 +70,7 @@ export default function BotConversations({ botId }: BotConversationsProps) {
 
   async function handleDeleteConversation(sessionId: string, e: React.MouseEvent) {
     e.stopPropagation();
-
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.')) {
-      return;
-    }
-
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.')) return;
     try {
       const success = await deleteConversation(sessionId);
       if (success) {
@@ -66,23 +88,27 @@ export default function BotConversations({ botId }: BotConversationsProps) {
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  function formatShortDate(dateString: string) {
+    const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 1) return 'A l\'instant';
     if (diffMins < 60) return `Il y a ${diffMins} min`;
     if (diffHours < 24) return `Il y a ${diffHours}h`;
     if (diffDays < 7) return `Il y a ${diffDays}j`;
-
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   }
 
   if (loading) {
@@ -104,6 +130,8 @@ export default function BotConversations({ botId }: BotConversationsProps) {
       </div>
     );
   }
+
+  const pairs = pairMessages(messages);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -129,16 +157,22 @@ export default function BotConversations({ botId }: BotConversationsProps) {
                   className="w-full px-4 py-3 text-left hover:bg-slate-50 transition"
                 >
                   <div className="flex items-start gap-3">
-                    <MessageSquare className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
+                    <MessageSquare className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0 pr-8">
-                      <p className="text-sm text-slate-900 truncate">
+                      <p className="text-sm text-slate-900 truncate font-medium">
                         {conv.first_message_preview || 'Nouvelle conversation'}
                       </p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                        <span>{conv.message_count} messages</span>
+                      <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
+                        <span>{conv.message_count} msg</span>
                         <span>•</span>
-                        <span>{formatDate(conv.created_at)}</span>
+                        <span>{formatShortDate(conv.created_at)}</span>
                       </div>
+                      {conv.ip_address && (
+                        <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
+                          <Monitor className="w-3 h-3" />
+                          <span className="font-mono">{conv.ip_address}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -160,10 +194,21 @@ export default function BotConversations({ botId }: BotConversationsProps) {
           <div className="bg-white rounded-lg border border-slate-200">
             <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-slate-900">Conversation</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {formatDate(selectedConversation.created_at)} - {selectedConversation.message_count} messages
-                </p>
+                <h3 className="font-semibold text-slate-900">Historique de conversation</h3>
+                <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-500">
+                  <span>{formatDate(selectedConversation.created_at)}</span>
+                  <span>•</span>
+                  <span>{selectedConversation.message_count} messages</span>
+                  {selectedConversation.ip_address && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Monitor className="w-3 h-3" />
+                        <span className="font-mono">{selectedConversation.ip_address}</span>
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => setSelectedConversation(null)}
@@ -178,54 +223,37 @@ export default function BotConversations({ botId }: BotConversationsProps) {
                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
               </div>
             ) : (
-              <div className="p-4 space-y-4 max-h-[600px] overflow-y-auto">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex gap-3 ${
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Bot className="w-4 h-4 text-blue-600" />
-                      </div>
-                    )}
-
-                    <div
-                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                        message.role === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-900'
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap break-words">
-                        {message.content}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 text-xs opacity-70">
-                        <Clock className="w-3 h-3" />
-                        <span>
-                          {new Date(message.created_at).toLocaleTimeString('fr-FR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                        {message.latency_ms && (
-                          <>
-                            <span>•</span>
-                            <span>{message.latency_ms}ms</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {message.role === 'user' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-slate-600" />
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="overflow-x-auto max-h-[560px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide w-36">
+                        Date et heure
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide w-1/2">
+                        Message utilisateur
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                        Reponse chatbot
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {pairs.map((pair, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 align-top">
+                        <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap font-mono">
+                          {formatDate(pair.date)}
+                        </td>
+                        <td className="px-4 py-3 text-slate-800 whitespace-pre-wrap break-words">
+                          {pair.userMessage}
+                        </td>
+                        <td className="px-4 py-3 text-slate-700 whitespace-pre-wrap break-words">
+                          {pair.botResponse || <span className="text-slate-400 italic text-xs">—</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -233,7 +261,7 @@ export default function BotConversations({ botId }: BotConversationsProps) {
           <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
             <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-4" />
             <p className="text-slate-600">
-              Sélectionnez une conversation pour voir les messages
+              Selectionnez une conversation pour voir les messages
             </p>
           </div>
         )}
