@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageCircle, Maximize2, Code, ArrowLeft, Sparkles } from 'lucide-react';
 import { ChatBubble } from '../components/ChatBubble';
 import { WhatsAppChat } from '../components/WhatsAppChat';
 import { EmbeddedChat } from '../components/EmbeddedChat';
 import { Navbar } from '../components/Navbar';
+import { supabase } from '../lib/supabase';
 
 type ChatModesPageProps = {
   botId: string;
@@ -11,8 +12,22 @@ type ChatModesPageProps = {
 
 type DisplayMode = 'bubble' | 'whatsapp' | 'embed' | null;
 
+const DEFAULT_COLOR = '#8eb4e3';
+
 export function ChatModesPage({ botId }: ChatModesPageProps) {
   const [mode, setMode] = useState<DisplayMode>(null);
+  const [primaryColor, setPrimaryColor] = useState(DEFAULT_COLOR);
+
+  useEffect(() => {
+    supabase
+      .from('bots')
+      .select('primary_color')
+      .eq('id', botId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.primary_color) setPrimaryColor(data.primary_color);
+      });
+  }, [botId]);
 
   function goBack() {
     window.history.pushState({}, '', '/client');
@@ -32,7 +47,7 @@ export function ChatModesPage({ botId }: ChatModesPageProps) {
 
       <Navbar />
 
-      {mode === 'bubble' && <ChatBubble botId={botId} />}
+      {mode === 'bubble' && <ChatBubble botId={botId} primaryColor={primaryColor} />}
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 relative z-10">
         <div className="mb-6 sm:mb-8">
@@ -127,6 +142,7 @@ export function ChatModesPage({ botId }: ChatModesPageProps) {
                   botId={botId}
                   title="Discutez avec l'assistant"
                   description="Obtenez des réponses instantanées à vos questions"
+                  primaryColor={primaryColor}
                 />
               </div>
             </div>
