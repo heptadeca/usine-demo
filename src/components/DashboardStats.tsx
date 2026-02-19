@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getDashboardStats, DashboardStats as Stats } from '../api/analytics';
-import { Activity, MessageSquare, Bot, TrendingUp } from 'lucide-react';
+import { Activity, Bot, TrendingUp } from 'lucide-react';
 
 export default function DashboardStats() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -43,10 +43,11 @@ export default function DashboardStats() {
     {
       title: 'Conversations Aujourd\'hui',
       value: stats.conversations_today,
-      icon: MessageSquare,
+      icon: null,
+      svgIcon: '/chat-bubbles-svgrepo-com.svg',
       color: 'blue',
       bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
+      iconFilter: 'brightness(0) saturate(100%) invert(27%) sepia(78%) saturate(1559%) hue-rotate(214deg) brightness(104%) contrast(94%)'
     },
     {
       title: 'Bots Actifs',
@@ -110,7 +111,16 @@ export default function DashboardStats() {
                 )}
               </div>
               <div className={`${card.bgColor} p-3 rounded-lg flex-shrink-0`}>
-                <card.icon className={`w-6 h-6 ${card.iconColor}`} />
+                {(card as any).svgIcon ? (
+                  <img
+                    src={(card as any).svgIcon}
+                    alt=""
+                    className="w-6 h-6 object-contain"
+                    style={{ filter: (card as any).iconFilter }}
+                  />
+                ) : card.icon ? (
+                  <card.icon className={`w-6 h-6 ${(card as any).iconColor}`} />
+                ) : null}
               </div>
             </div>
           </div>
