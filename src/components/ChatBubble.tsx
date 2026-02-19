@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Minimize2 } from 'lucide-react';
 import { ChatWidget } from './ChatWidget';
+import { getIconFilter } from '../lib/colorUtils';
 
 type ChatBubbleProps = {
   botId: string;
@@ -12,6 +13,8 @@ const DEFAULT_COLOR = '#8eb4e3';
 export function ChatBubble({ botId, primaryColor = DEFAULT_COLOR }: ChatBubbleProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+
+  const iconFilter = getIconFilter(primaryColor);
 
   return (
     <>
@@ -30,7 +33,12 @@ export function ChatBubble({ botId, primaryColor = DEFAULT_COLOR }: ChatBubblePr
             >
               <div className="flex items-center gap-2 text-white">
                 <div className="bg-white/20 rounded-lg p-1">
-                  <img src="/image.png" alt="Chat" className="w-4 h-4 object-contain" />
+                  <img
+                    src="/chat-bubbles-svgrepo-com.svg"
+                    alt="Chat"
+                    className="w-4 h-4 object-contain"
+                    style={{ filter: iconFilter }}
+                  />
                 </div>
                 <span className="font-semibold text-sm">Assistant de Chat</span>
               </div>
@@ -65,13 +73,18 @@ export function ChatBubble({ botId, primaryColor = DEFAULT_COLOR }: ChatBubblePr
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:opacity-90 ${
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:opacity-90 ${
           isOpen ? 'scale-0' : 'scale-100'
         }`}
         style={{ background: primaryColor }}
         aria-label="Ouvrir le chat"
       >
-        <img src="/image.png" alt="Chat" className="w-6 h-6 object-contain" />
+        <img
+          src="/chat-bubbles-svgrepo-com.svg"
+          alt="Chat"
+          className="w-6 h-6 object-contain"
+          style={{ filter: iconFilter }}
+        />
       </button>
     </>
   );

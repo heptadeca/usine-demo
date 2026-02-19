@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Loader2, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { hexToRgbString, getIconFilter } from '../lib/colorUtils';
 import type { Message } from '../lib/supabase';
 
 type ChatWidgetProps = {
@@ -10,13 +11,6 @@ type ChatWidgetProps = {
 };
 
 const DEFAULT_COLOR = '#8eb4e3';
-
-function hexToRgb(hex: string) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '142, 180, 227';
-}
 
 export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -179,7 +173,8 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
     await sendMessageToBot(exampleMessage, sessionId);
   }
 
-  const rgb = hexToRgb(primaryColor);
+  const rgb = hexToRgbString(primaryColor);
+  const iconFilter = getIconFilter(primaryColor);
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -199,7 +194,12 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
                 className="relative p-6 rounded-3xl shadow-xl"
                 style={{ background: primaryColor }}
               >
-                <img src="/image.png" alt="Chat" className="w-14 h-14 object-contain" />
+                <img
+                  src="/chat-bubbles-svgrepo-com.svg"
+                  alt="Chat"
+                  className="w-14 h-14 object-contain"
+                  style={{ filter: iconFilter }}
+                />
               </div>
             </div>
             <div className="text-center space-y-3 max-w-md">
@@ -231,7 +231,12 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
                     className="w-7 h-7 rounded-full flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1"
                     style={{ background: primaryColor }}
                   >
-                    <img src="/image.png" alt="Bot" className="w-4 h-4 object-contain" />
+                    <img
+                      src="/chat-bubbles-svgrepo-com.svg"
+                      alt="Bot"
+                      className="w-4 h-4 object-contain"
+                      style={{ filter: iconFilter }}
+                    />
                   </div>
                 )}
                 <div
@@ -252,7 +257,12 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
                   className="w-7 h-7 rounded-full flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1"
                   style={{ background: primaryColor }}
                 >
-                  <img src="/image.png" alt="Bot" className="w-4 h-4 object-contain" />
+                  <img
+                    src="/chat-bubbles-svgrepo-com.svg"
+                    alt="Bot"
+                    className="w-4 h-4 object-contain"
+                    style={{ filter: iconFilter }}
+                  />
                 </div>
                 <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-t-2xl rounded-br-2xl rounded-bl-md">
                   <div className="flex gap-1 items-center h-4">

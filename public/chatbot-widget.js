@@ -172,7 +172,7 @@
       container.id = 'chatbot-widget-container';
       container.innerHTML = `
         <button class="chatbot-bubble-button" id="chatbot-bubble-button" aria-label="Ouvrir le chat">
-          <img src="${origin}/image.png" alt="Chat" />
+          <img src="${origin}/chat-bubbles-svgrepo-com.svg" alt="Chat" id="chatbot-bubble-icon" />
         </button>
 
         <div class="chatbot-bubble-window" id="chatbot-bubble-window">
@@ -187,6 +187,20 @@
       `;
 
       document.body.appendChild(container);
+
+      (function applyIconFilter() {
+        function getLuminance(hex) {
+          var r = parseInt(hex.slice(1, 3), 16) / 255;
+          var g = parseInt(hex.slice(3, 5), 16) / 255;
+          var b = parseInt(hex.slice(5, 7), 16) / 255;
+          function toLinear(v) { return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+          return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+        }
+        var lum = getLuminance(primaryColor);
+        var iconFilter = lum > 0.35 ? 'brightness(0)' : 'brightness(0) invert(1)';
+        var icon = document.getElementById('chatbot-bubble-icon');
+        if (icon) icon.style.filter = iconFilter;
+      })();
 
       const button = document.getElementById('chatbot-bubble-button');
       const chatWindow = document.getElementById('chatbot-bubble-window');

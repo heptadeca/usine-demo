@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChatWidget } from '../components/ChatWidget';
 import { supabase } from '../lib/supabase';
+import { getIconFilter } from '../lib/colorUtils';
 
 type DemoPageProps = {
   botId: string;
@@ -22,11 +23,18 @@ export function DemoPage({ botId }: DemoPageProps) {
       });
   }, [botId]);
 
+  const iconFilter = getIconFilter(primaryColor);
+
   return (
     <div className="h-screen flex flex-col bg-white">
       <div className="border-b border-slate-100 px-4 py-3 flex items-center gap-3" style={{ background: primaryColor }}>
         <div className="bg-white/20 p-1.5 rounded-lg">
-          <img src="/image.png" alt="Chat" className="w-6 h-6 object-contain" />
+          <img
+            src="/chat-bubbles-svgrepo-com.svg"
+            alt="Chat"
+            className="w-6 h-6 object-contain"
+            style={{ filter: iconFilter }}
+          />
         </div>
         <div>
           <h1 className="font-semibold text-white text-sm">Besoin d'infos ? Besoin d'aide ?</h1>
