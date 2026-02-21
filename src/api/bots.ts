@@ -2,8 +2,8 @@ import { supabase } from '../lib/supabase';
 import { createBotSchema, updateBotSchema } from '../lib/validation';
 import type { Bot } from '../lib/supabase';
 
-const N8N_INGEST_URL = 'https://n8n.prcz.fr/webhook-test/lacroix-ingestdata';
-const N8N_CHAT_URL = 'https://n8n.prcz.fr/webhook/lacroix-chat';
+const N8N_INGEST_URL = import.meta.env.VITE_N8N_INGEST_URL as string;
+const N8N_CHAT_URL = import.meta.env.VITE_N8N_CHAT_URL as string;
 
 export async function listBots(clientId: string, role: string): Promise<Bot[]> {
   let query = supabase.from('bots').select('*').order('created_at', { ascending: false });

@@ -80,7 +80,7 @@ export function WhatsAppChat({ botId, botName = 'Assistant', onBack }: WhatsAppC
       }
 
       const startTime = Date.now();
-      const chatUrl = bot.n8n_chat_url || 'https://n8n.prcz.fr/webhook/lacroix-chat';
+      const chatUrl = bot.n8n_chat_url || (import.meta.env.VITE_N8N_CHAT_URL as string);
 
       const response = await fetch(chatUrl, {
         method: 'POST',

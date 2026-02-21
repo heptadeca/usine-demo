@@ -105,7 +105,7 @@ Deno.serve(async (req: Request) => {
         content: message,
       });
 
-    const n8nUrl = 'https://n8n.prcz.fr/webhook/lacroix-chat';
+    const n8nUrl = Deno.env.get('N8N_CHAT_URL') ?? '';
 
     const n8nResponse = await fetch(n8nUrl, {
       method: 'POST',

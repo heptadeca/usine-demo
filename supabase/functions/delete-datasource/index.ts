@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     try {
-      const webhookResponse = await fetch('https://n8n.prcz.fr/webhook/lacroix-deletedata', {
+      const webhookResponse = await fetch(Deno.env.get('N8N_DELETE_URL') ?? '', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

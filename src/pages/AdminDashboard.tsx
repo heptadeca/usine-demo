@@ -74,8 +74,8 @@ export function AdminDashboard() {
           owner_client_id: client.id,
           status: 'ready',
           api_key: apiKey,
-          n8n_ingest_url: 'https://n8n.prcz.fr/webhook/lacroix-ingestdata',
-          n8n_chat_url: 'https://n8n.prcz.fr/webhook/lacroix-chat',
+          n8n_ingest_url: import.meta.env.VITE_N8N_INGEST_URL as string,
+          n8n_chat_url: import.meta.env.VITE_N8N_CHAT_URL as string,
         });
 
       if (!error) {
