@@ -6,8 +6,6 @@
     return;
   }
 
-  var SUPABASE_URL = 'https://yjmcrgbumrwyfhzwiddl.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqbWNyZ2J1bXJ3eWZoendpZGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwNDc3NDcsImV4cCI6MjA3NTYyMzc0N30.TnVs06F6ZKZisq3zPd5WZ4rdKQ0UrLQKihUmomY0h2E';
   var DEFAULT_COLOR = '#8eb4e3';
 
   function getLuminance(hex) {
@@ -212,6 +210,23 @@
     });
   }
 
+  function fetchBotColor(botId, supabaseUrl, supabaseAnonKey, callback) {
+    fetch(supabaseUrl + '/rest/v1/bots?select=primary_color&id=eq.' + encodeURIComponent(botId), {
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': 'Bearer ' + supabaseAnonKey,
+      }
+    })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var color = (data && data[0] && data[0].primary_color) ? data[0].primary_color : DEFAULT_COLOR;
+        callback(color);
+      })
+      .catch(function() {
+        callback(DEFAULT_COLOR);
+      });
+  }
+
   window.ChatbotWidget = {
     init: function(config) {
       if (!config.botId) {
@@ -227,20 +242,14 @@
         return;
       }
 
-      fetch(SUPABASE_URL + '/rest/v1/bots?select=primary_color&id=eq.' + encodeURIComponent(botId), {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        }
-      })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          var color = (data && data[0] && data[0].primary_color) ? data[0].primary_color : DEFAULT_COLOR;
+      if (config.supabaseUrl && config.supabaseAnonKey) {
+        fetchBotColor(botId, config.supabaseUrl, config.supabaseAnonKey, function(color) {
           buildWidget(botId, origin, color);
-        })
-        .catch(function() {
-          buildWidget(botId, origin, DEFAULT_COLOR);
         });
+        return;
+      }
+
+      buildWidget(botId, origin, DEFAULT_COLOR);
     }
   };
 })();

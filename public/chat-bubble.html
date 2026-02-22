@@ -6,19 +6,23 @@
   <title>Chat Bubble Widget - Preview</title>
 </head>
 <body>
+  <script src="/env-config.js"></script>
   <script src="/chatbot-widget.js"></script>
   <script>
     (function() {
-      const botId = new URLSearchParams(window.location.search).get('botId');
+      var botId = new URLSearchParams(window.location.search).get('botId');
       if (!botId) {
         console.error('Bot ID is required');
         document.body.innerHTML = '<div style="padding: 40px; text-align: center; font-family: sans-serif;"><h1>Error</h1><p>Bot ID is required. Please use: chat-bubble.html?botId=YOUR_BOT_ID</p></div>';
         return;
       }
 
+      var env = window.__ENV_CONFIG__ || {};
       ChatbotWidget.init({
         botId: botId,
-        origin: window.location.origin
+        origin: window.location.origin,
+        supabaseUrl: env.SUPABASE_URL,
+        supabaseAnonKey: env.SUPABASE_ANON_KEY
       });
     })();
   </script>
