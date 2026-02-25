@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getBotConversations, getConversationMessages, deleteConversation, Conversation, Message } from '../api/analytics';
-import { MessageSquare, X, Loader2, Trash2, Monitor } from 'lucide-react';
+import { MessageSquare, X, Loader2, Trash2, Monitor, Download } from 'lucide-react';
 
 interface BotConversationsProps {
   botId: string;
@@ -10,6 +10,45 @@ interface MessagePair {
   date: string;
   userMessage: string;
   botResponse: string;
+}
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function exportToExcel(rows: string[][], filename: string) {
+  const cols = rows[0].map((_, i) => `<Column ss:Width="200"/>`).join('');
+  const xmlRows = rows.map(row => {
+    const cells = row.map(cell => `<Cell><Data ss:Type="String">${escapeXml(String(cell ?? ''))}</Data></Cell>`).join('');
+    return `<Row>${cells}</Row>`;
+  }).join('');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="header">
+      <Font ss:Bold="1"/>
+      <Interior ss:Color="#F1F5F9" ss:Pattern="Solid"/>
+    </Style>
+  </Styles>
+  <Worksheet ss:Name="Conversations">
+    <Table>${cols}${xmlRows}</Table>
+  </Worksheet>
+</Workbook>`;
+
+  const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function pairMessages(messages: Message[]): MessagePair[] {
@@ -66,6 +105,32 @@ export default function BotConversations({ botId }: BotConversationsProps) {
     } finally {
       setLoadingMessages(false);
     }
+  }
+
+  function handleExportAllConversations() {
+    const header = ['Session ID', 'Date de début', 'Dernier message', 'Nombre de messages', 'Aperçu du premier message', 'Adresse IP'];
+    const rows = conversations.map(conv => [
+      conv.session_id,
+      formatDate(conv.created_at),
+      formatDate(conv.last_message_at),
+      String(conv.message_count),
+      conv.first_message_preview || '',
+      conv.ip_address || '',
+    ]);
+    exportToExcel([header, ...rows], `conversations_${botId}_${new Date().toISOString().slice(0, 10)}.xls`);
+  }
+
+  function handleExportConversation() {
+    if (!selectedConversation || messages.length === 0) return;
+    const currentPairs = pairMessages(messages);
+    if (currentPairs.length === 0) return;
+    const header = ['Date et heure', 'Message utilisateur', 'Réponse chatbot'];
+    const rows = currentPairs.map(pair => [
+      formatDate(pair.date),
+      pair.userMessage,
+      pair.botResponse,
+    ]);
+    exportToExcel([header, ...rows], `conversation_${selectedConversation.session_id.slice(0, 8)}_${new Date().toISOString().slice(0, 10)}.xls`);
   }
 
   async function handleDeleteConversation(sessionId: string, e: React.MouseEvent) {
@@ -137,10 +202,18 @@ export default function BotConversations({ botId }: BotConversationsProps) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-1">
         <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-          <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+          <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
             <h3 className="font-semibold text-slate-900">
               Conversations ({conversations.length})
             </h3>
+            <button
+              onClick={handleExportAllConversations}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 rounded-lg transition-all hover:shadow-sm"
+              title="Exporter toutes les conversations en Excel"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Exporter
+            </button>
           </div>
           <div className="divide-y divide-slate-200 max-h-[600px] overflow-y-auto">
             {conversations.map((conv) => (
@@ -210,12 +283,22 @@ export default function BotConversations({ botId }: BotConversationsProps) {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedConversation(null)}
-                className="p-1 hover:bg-slate-200 rounded transition"
-              >
-                <X className="w-5 h-5 text-slate-600" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportConversation}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 rounded-lg transition-all hover:shadow-sm"
+                  title="Exporter cette conversation en Excel"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Exporter
+                </button>
+                <button
+                  onClick={() => setSelectedConversation(null)}
+                  className="p-1 hover:bg-slate-200 rounded transition"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
             </div>
 
             {loadingMessages ? (
