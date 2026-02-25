@@ -77,6 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setToken(null);
     setClient(null);
+    window.history.pushState({}, '', '/');
+    // Dispatch popstate event to notify the Router
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }
 
   return (

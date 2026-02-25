@@ -4,6 +4,7 @@ import type { Bot } from '../lib/supabase';
 
 const N8N_INGEST_URL = import.meta.env.VITE_N8N_INGEST_URL as string;
 const N8N_CHAT_URL = import.meta.env.VITE_N8N_CHAT_URL as string;
+const N8N_DELETE_URL = import.meta.env.VITE_N8N_DELETE_URL as string;
 
 export async function listBots(clientId: string, role: string): Promise<Bot[]> {
   let query = supabase.from('bots').select('*').order('created_at', { ascending: false });
@@ -70,6 +71,7 @@ export async function createBot(name: string, ownerId: string | null) {
       status: 'draft',
       n8n_ingest_url: N8N_INGEST_URL,
       n8n_chat_url: N8N_CHAT_URL,
+      n8n_delete_url: N8N_DELETE_URL,
     })
     .select()
     .single();

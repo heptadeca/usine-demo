@@ -25,6 +25,7 @@ export type Bot = {
   prompt: string | null;
   n8n_ingest_url: string;
   n8n_chat_url: string;
+  n8n_delete_url: string;
   created_at: string;
 };
 

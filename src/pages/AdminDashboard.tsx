@@ -76,6 +76,7 @@ export function AdminDashboard() {
           api_key: apiKey,
           n8n_ingest_url: import.meta.env.VITE_N8N_INGEST_URL as string,
           n8n_chat_url: import.meta.env.VITE_N8N_CHAT_URL as string,
+          n8n_delete_url: import.meta.env.VITE_N8N_DELETE_URL as string,
         });
 
       if (!error) {
@@ -214,77 +215,76 @@ export function AdminDashboard() {
             </button>
           </div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-          </div>
-        ) : bots.length === 0 ? (
-          <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
-            <p className="text-slate-600">Aucun chatbot pour le moment. Créez-en un !</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Nom
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Créé le
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {bots.map((bot) => (
-                  <tr key={bot.id} className="hover:bg-slate-50 transition">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{bot.name}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          bot.status === 'ready'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}
-                      >
-                        {bot.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {new Date(bot.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end items-center gap-3">
-                        <a
-                          href={`/admin/bots/${bot.id}`}
-                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm"
-                        >
-                          Gérer
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                        <button
-                          onClick={() => deleteBot(bot.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                          title="Supprimer le bot"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            </div>
+          ) : bots.length === 0 ? (
+            <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
+              <p className="text-slate-600">Aucun chatbot pour le moment. Créez-en un !</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Nom
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Créé le
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {bots.map((bot) => (
+                    <tr key={bot.id} className="hover:bg-slate-50 transition">
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-slate-900">{bot.name}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${bot.status === 'ready'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                            }`}
+                        >
+                          {bot.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {new Date(bot.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end items-center gap-3">
+                          <a
+                            href={`/admin/bots/${bot.id}`}
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                          >
+                            Gérer
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                          <button
+                            onClick={() => deleteBot(bot.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded transition"
+                            title="Supprimer le bot"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <div>
