@@ -8,6 +8,10 @@
 
   var DEFAULT_COLOR = '#8eb4e3';
 
+  // Public Supabase credentials (anon key is safe to expose)
+  var SUPABASE_URL = 'https://ohselczgjdehzqphxpou.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc2VsY3pnamRlaHpxcGh4cG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjU1MTgsImV4cCI6MjA4NzU0MTUxOH0.aYf7Y5Sg8ZfGieaz0xdUY4Q1KJJwl1_tL3j-e15XxPA';
+
   function getLuminance(hex) {
     var r = parseInt(hex.slice(1, 3), 16) / 255;
     var g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -254,7 +258,10 @@
         return;
       }
 
-      buildWidget(botId, origin, DEFAULT_COLOR);
+      // Auto-fetch using built-in credentials
+      fetchBotColor(botId, SUPABASE_URL, SUPABASE_ANON_KEY, function (color) {
+        buildWidget(botId, origin, color);
+      });
     }
   };
 })();
