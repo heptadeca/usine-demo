@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   if (window.ChatbotWidget) {
@@ -34,11 +34,11 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
       }
 
-      .chatbot-bubble-button {
+      #chatbot-bubble-button.chatbot-bubble-button {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: ${color};
+        background: ${color} !important;
         border: none;
         cursor: pointer;
         display: flex;
@@ -184,7 +184,7 @@
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
-        <iframe class="chatbot-bubble-iframe" id="chatbot-iframe" src="${origin}/demo/${botId}"></iframe>
+        <iframe class="chatbot-bubble-iframe" id="chatbot-iframe" src="${origin}/demo/${botId}?primaryColor=${encodeURIComponent(color)}"></iframe>
       </div>
     `;
 
@@ -199,12 +199,17 @@
     var chatWindow = document.getElementById('chatbot-bubble-window');
     var closeButton = document.getElementById('chatbot-close-button');
 
-    button.addEventListener('click', function() {
+    // Fallback: Force background color if not applied by CSS
+    if (button) {
+      button.style.setProperty('background-color', color, 'important');
+    }
+
+    button.addEventListener('click', function () {
       chatWindow.classList.add('open');
       button.classList.add('hidden');
     });
 
-    closeButton.addEventListener('click', function() {
+    closeButton.addEventListener('click', function () {
       chatWindow.classList.remove('open');
       button.classList.remove('hidden');
     });
@@ -217,18 +222,18 @@
         'Authorization': 'Bearer ' + supabaseAnonKey,
       }
     })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
         var color = (data && data[0] && data[0].primary_color) ? data[0].primary_color : DEFAULT_COLOR;
         callback(color);
       })
-      .catch(function() {
+      .catch(function () {
         callback(DEFAULT_COLOR);
       });
   }
 
   window.ChatbotWidget = {
-    init: function(config) {
+    init: function (config) {
       if (!config.botId) {
         console.error('Chatbot widget: botId is required');
         return;
@@ -243,7 +248,7 @@
       }
 
       if (config.supabaseUrl && config.supabaseAnonKey) {
-        fetchBotColor(botId, config.supabaseUrl, config.supabaseAnonKey, function(color) {
+        fetchBotColor(botId, config.supabaseUrl, config.supabaseAnonKey, function (color) {
           buildWidget(botId, origin, color);
         });
         return;

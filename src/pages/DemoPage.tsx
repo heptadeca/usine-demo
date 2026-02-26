@@ -13,6 +13,14 @@ export function DemoPage({ botId }: DemoPageProps) {
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_COLOR);
 
   useEffect(() => {
+    // Check for primaryColor in URL first to avoid lag
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlColor = urlParams.get('primaryColor');
+    if (urlColor) {
+      setPrimaryColor(urlColor);
+      return;
+    }
+
     supabase
       .from('bots')
       .select('primary_color')
@@ -26,7 +34,7 @@ export function DemoPage({ botId }: DemoPageProps) {
   const iconFilter = getIconFilter(primaryColor);
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col bg-white rounded-2xl overflow-hidden">
       <div className="border-b border-slate-100 px-4 py-3 flex items-center gap-3" style={{ background: primaryColor }}>
         <div className="bg-white/20 p-1.5 rounded-lg">
           <img

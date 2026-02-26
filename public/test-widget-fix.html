@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Test</title>
+</head>
+<body>
+    <h1>Testing Chatbot Widget Color</h1>
+    <p>The bubble below should be bright red (#FF0000).</p>
+
+    <!-- Mock origin for the script to find its assets -->
+    <script>
+        // We'll use a real botId from the system if possible, or just a dummy one
+        // Since we are mocking the initialization, we can provide manual color
+    </script>
+    <script src="./chatbot-widget.js"></script>
+    <script>
+        ChatbotWidget.init({
+            botId: 'test-bot-id',
+            origin: window.location.origin, // Assuming we serve from public folder
+            primaryColor: '#FF0000'
+        });
+    </script>
+</body>
+</html>
