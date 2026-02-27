@@ -82,6 +82,7 @@
         height: 600px;
         background: white;
         border-radius: 16px;
+        border: 2px solid ${color};
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         display: none;
         flex-direction: column;

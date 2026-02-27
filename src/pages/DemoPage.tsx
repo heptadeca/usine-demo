@@ -34,9 +34,9 @@ export function DemoPage({ botId }: DemoPageProps) {
   const iconFilter = getIconFilter(primaryColor);
 
   return (
-    <div className="h-screen flex flex-col bg-white rounded-2xl overflow-hidden">
-      <div className="border-b border-slate-100 px-4 py-3 flex items-center gap-3" style={{ background: primaryColor }}>
-        <div className="bg-white/20 p-1.5 rounded-lg">
+    <div className="h-screen flex flex-col bg-white rounded-2xl overflow-hidden" style={{ border: `2px solid ${primaryColor}` }}>
+      <div className="px-4 py-3 flex items-center gap-3 border-b" style={{ background: 'white', borderColor: `${primaryColor}33` }}>
+        <div className="p-1.5 rounded-lg" style={{ background: primaryColor + '1a' }}>
           <img
             src="/chat-bubbles-svgrepo-com.svg"
             alt="Chat"
@@ -45,8 +45,8 @@ export function DemoPage({ botId }: DemoPageProps) {
           />
         </div>
         <div>
-          <h1 className="font-semibold text-white text-sm">Besoin d'infos ? Besoin d'aide ?</h1>
-          <p className="text-xs text-white/80">Je réponds à vos questions…</p>
+          <h1 className="font-semibold text-sm" style={{ color: primaryColor }}>Besoin d'infos ? Besoin d'aide ?</h1>
+          <p className="text-xs text-slate-400">Je réponds à vos questions…</p>
         </div>
       </div>
 
