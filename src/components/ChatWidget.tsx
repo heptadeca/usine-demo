@@ -28,6 +28,12 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (!loading) {
+      inputRef.current?.focus();
+    }
+  }, [loading]);
+
   function scrollToBottom() {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
@@ -157,7 +163,6 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
     if (!input.trim() || !sessionId) return;
     const userMessage = input.trim();
     setInput('');
-    inputRef.current?.focus();
     await sendMessageToBot(userMessage, sessionId);
   }
 
@@ -243,8 +248,8 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
                 )}
                 <div
                   className={`max-w-[72%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${message.role === 'user'
-                      ? 'text-white rounded-t-2xl rounded-bl-2xl rounded-br-md'
-                      : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-t-2xl rounded-br-2xl rounded-bl-md'
+                    ? 'text-white rounded-t-2xl rounded-bl-2xl rounded-br-md'
+                    : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-t-2xl rounded-br-2xl rounded-bl-md'
                     }`}
                   style={message.role === 'user' ? { background: primaryColor } : {}}
                 >
