@@ -184,7 +184,7 @@
 
       <div class="chatbot-bubble-window" id="chatbot-bubble-window">
         <button class="chatbot-bubble-close-button" id="chatbot-close-button" title="Fermer" aria-label="Fermer" style="background:rgba(255,255,255,0.2)">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
