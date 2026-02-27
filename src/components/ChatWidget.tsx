@@ -18,6 +18,7 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     createSession();
@@ -156,6 +157,7 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
     if (!input.trim() || !sessionId) return;
     const userMessage = input.trim();
     setInput('');
+    inputRef.current?.focus();
     await sendMessageToBot(userMessage, sessionId);
   }
 
@@ -240,11 +242,10 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
                   </div>
                 )}
                 <div
-                  className={`max-w-[72%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
-                    message.role === 'user'
+                  className={`max-w-[72%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${message.role === 'user'
                       ? 'text-white rounded-t-2xl rounded-bl-2xl rounded-br-md'
                       : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-t-2xl rounded-br-2xl rounded-bl-md'
-                  }`}
+                    }`}
                   style={message.role === 'user' ? { background: primaryColor } : {}}
                 >
                   {message.content}
@@ -280,6 +281,7 @@ export function ChatWidget({ botId, primaryColor = DEFAULT_COLOR }: ChatWidgetPr
       <div className="border-t border-slate-100 bg-white p-4">
         <div className="flex gap-2">
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
